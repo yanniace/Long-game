@@ -15,6 +15,7 @@
   var originalSave = window.save;
   var stateLabel = 'Local only';
   var conflictLocked = false;
+  var lastSemanticState = '';
 
   function cfg() { return window.TLG_CONFIG || {}; }
   function configured() {
@@ -295,7 +296,7 @@
   async function applyCloud(row, ask) {
     if (!row || !row.state) return;
     if (ask && !confirm('Replace this device\'s local dashboard with cloud version ' + (row.version || 0) + '?\n\nA local JSON backup will download first. The cloud will not be changed.')) return;
-    if (meaningful(snapshot())) downloadBackup(snapshot(), 'cloud-download');
+    if (ask && meaningful(snapshot())) downloadBackup(snapshot(), 'cloud-download');
     localStorage.setItem(STORAGE_KEY, JSON.stringify(row.state));
     writeMeta({ dirty: false, lastSyncedVersion: row.version || 0, lastSyncedAt: row.updated_at || new Date().toISOString() });
     setLinked(true);
@@ -389,8 +390,12 @@
 
   function wrapLocalSave() {
     if (typeof originalSave !== 'function') return;
+    lastSemanticState = JSON.stringify(comparable(snapshot()));
     window.save = function () {
       originalSave();
+      var currentSemanticState = JSON.stringify(comparable(snapshot()));
+      if (currentSemanticState === lastSemanticState) return;
+      lastSemanticState = currentSemanticState;
       writeMeta({ dirty: true, localUpdatedAt: new Date().toISOString(), deviceId: deviceId() });
       scheduleBridgeSave();
       if (conflictLocked) {
