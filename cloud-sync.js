@@ -40,8 +40,25 @@
   }
   function meaningful(data) {
     if (!data || typeof data !== 'object') return false;
-    return ['tasks','focusSessions','dueDates','projects'].some(function (k) { return Array.isArray(data[k]) && data[k].length; }) ||
-      ['clockRecords','moodHistory','mindRecords','weeklyPlans','subprojects'].some(function (k) { return data[k] && Object.keys(data[k]).length; });
+    if (['tasks','focusSessions','dueDates','projects'].some(function (k) { return Array.isArray(data[k]) && data[k].length; })) return true;
+    var clock = data.clockRecords || {};
+    if (Object.keys(clock).some(function (day) {
+      return Object.keys(clock[day] || {}).some(function (key) {
+        var rec = clock[day][key] || {};
+        return Boolean(rec.inTs || rec.outTs || rec.inTime || rec.outTime || rec.totalMins ||
+          (Array.isArray(rec.segments) && rec.segments.some(function (seg) { return seg && (seg.inTs || seg.outTs || seg.inTime || seg.outTime); })));
+      });
+    })) return true;
+    if (Object.keys(data.weeklyPlans || {}).some(function (key) {
+      var plan = data.weeklyPlans[key] || {};
+      return (Array.isArray(plan.items) && plan.items.length) || String(plan.priorities || '').trim() || String(plan.actions || '').trim();
+    })) return true;
+    if (Object.keys(data.moodHistory || {}).some(function (key) { return Array.isArray(data.moodHistory[key]) && data.moodHistory[key].length; })) return true;
+    if (Object.keys(data.mindRecords || {}).some(function (key) {
+      var rec = data.mindRecords[key] || {};
+      return ['morning','best','improve'].some(function (field) { return String(rec[field] || '').trim(); });
+    })) return true;
+    return Object.keys(data.subprojects || {}).some(function (key) { return Array.isArray(data.subprojects[key]) && data.subprojects[key].length; });
   }
   function summary(data) {
     data = data || {};
@@ -168,6 +185,15 @@
         return;
       }
       if (!isLinked()) {
+        // Recover the device link after an older cached build or a partially
+        // cleared browser store. A clean, previously synced device must not be
+        // forced through the conflict dialog on every launch.
+        if (!meta.dirty && meta.lastSyncedVersion && meta.lastSyncedVersion === (row.version || 0)) {
+          setLinked(true);
+          setStatus('Synced', 'synced');
+          message('This device matches cloud version ' + (row.version || 0) + '.');
+          return;
+        }
         setStatus('Conflict / newer cloud version', 'conflict');
         message('Both this device and the cloud contain data. Review the choices before replacing either copy.', true);
         return;
