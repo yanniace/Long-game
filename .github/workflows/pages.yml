@@ -1,0 +1,44 @@
+name: Deploy The Long Game to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build static Pages artifact
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_PUBLISHABLE_KEY"
+          mkdir -p _site/icons
+          cp phd_dashboard.html _site/index.html
+          cp cloud-sync.js sync.css manifest.webmanifest service-worker.js _site/
+          cp icons/* _site/icons/
+          printf 'window.TLG_CONFIG = %s;\n' "$(jq -cn --arg url "$SUPABASE_URL" --arg key "$SUPABASE_PUBLISHABLE_KEY" '{SUPABASE_URL:$url,SUPABASE_PUBLISHABLE_KEY:$key}')" > _site/config.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+

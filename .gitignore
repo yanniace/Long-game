@@ -1,0 +1,29 @@
+# The Long Game private/local state — never commit these files.
+data.json
+data.json.*
+data-*.json
+backup*.json
+*backup*.json
+*.backup.json
+*.bak.json
+backups/
+private/
+local/
+exports/
+
+# Local configuration and secrets.
+.env
+.env.*
+!.env.example
+config.js
+
+# macOS / Python / editor noise.
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+*.log
+
+# Generated GitHub Pages output.
+_site/
+
