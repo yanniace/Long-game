@@ -14,5 +14,11 @@
 .tlg-cloud-btn{border:0;border-radius:.75rem;padding:.65rem .85rem;font-size:.82rem;font-weight:800;cursor:pointer}
 .tlg-cloud-primary{background:#4D9DE0;color:#fff}.tlg-cloud-safe{background:#ecfdf5;color:#047857}.tlg-cloud-warn{background:#fff7ed;color:#c2410c}.tlg-cloud-muted{background:#f3f4f6;color:#4b5563}
 .tlg-cloud-note{font-size:.78rem;color:#6b7280;line-height:1.55}.tlg-cloud-message{min-height:1.25rem;font-size:.8rem;font-weight:700;color:#374151}
+.tlg-sync-gate{position:fixed;inset:0;z-index:2400;background:rgba(255,255,255,.82);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:1rem}
+.tlg-sync-gate.on{display:flex}
+.tlg-sync-gate-card{width:min(26rem,100%);background:#fff;border:1px solid #dbeafe;border-top:6px solid #4D9DE0;border-radius:1.4rem;padding:1.4rem;text-align:center;box-shadow:0 24px 60px rgba(17,24,39,.2)}
+.tlg-sync-gate-card h2{font-size:1.15rem;font-weight:900;color:#374151;margin:.6rem 0 .35rem}.tlg-sync-gate-card p{font-size:.85rem;line-height:1.55;color:#6b7280;margin:0 0 .9rem}
+.tlg-sync-gate-spinner{width:2rem;height:2rem;border:3px solid #dbeafe;border-top-color:#4D9DE0;border-radius:999px;margin:0 auto;animation:tlg-gate-spin .8s linear infinite}
+@keyframes tlg-gate-spin{to{transform:rotate(360deg)}}
 @media(max-width:640px){body{padding:.75rem!important}.tlg-sync-button{padding:.45rem .6rem}.tlg-cloud-card{border-radius:1.1rem;padding:1rem}.tlg-cloud-btn{flex:1}.timeline-shell{overflow-x:auto}}
 
